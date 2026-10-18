@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>auto-tok · TikTok authorisation</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+<h1>TikTok authorisation</h1>
+<p id="status" class="status">Reading response…</p>
+<p id="detail"></p>
+<p>Copy the full URL below and paste it into the terminal running <code>node engine/cli.js tiktok-auth</code>. The code expires within a few minutes, so do this now.</p>
+<label for="url" class="muted">Current URL</label>
+<textarea id="url" readonly spellcheck="false"></textarea>
+<button id="copy" type="button">Copy URL</button>
+<span id="copied" class="muted" aria-live="polite"></span>
+<p class="muted">This page sends nothing anywhere: no requests, no cookies, no analytics.</p>
+</main>
+<script>
+(function () {
+  var q = new URLSearchParams(window.location.search);
+  var status = document.getElementById('status');
+  var detail = document.getElementById('detail');
+  var box = document.getElementById('url');
+  box.value = window.location.href;
+  if (q.get('error')) {
+    status.textContent = 'Authorisation failed ✗';
+    status.className = 'status err';
+    detail.textContent = q.get('error') + (q.get('error_description') ? ': ' + q.get('error_description') : '');
+  } else if (q.get('code')) {
+    status.textContent = 'Authorized ✓';
+    status.className = 'status ok';
+  } else {
+    status.textContent = 'No authorisation code in this URL.';
+    status.className = 'status err';
+  }
+  document.getElementById('copy').addEventListener('click', function () {
+    var note = document.getElementById('copied');
+    function done() { note.textContent = ' Copied.'; }
+    function fallback() { box.select(); document.execCommand('copy'); done(); }
+    box.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(box.value).then(done, fallback);
+    } else { fallback(); }
+  });
+})();
+</script>
+</body>
+</html>
